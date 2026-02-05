@@ -60,31 +60,64 @@ int WatchdogRP2350::sleep(int maxPeriodMS) {
   return maxPeriodMS;
 }
 
-void WatchdogRP2350::ResumeFromSleep() {
-  // NOTE: WiFi or other peripherals may need to be re-initialized in user-code, preferably in the wake callback, if used.
-  // Re-enable clock sources and generators
-  sleep_power_up();
+/**************************************************************************/
+/*!
+    @brief  Re-enables clock sources and generators after waking from sleep,
+   must be called by user code.
+*/
+/**************************************************************************/
+void WatchdogRP2350::ResumeFromSleep() { sleep_power_up(); }
+
+/**************************************************************************/
+/*!
+    @brief  Sets a callback function to be called upon wake from sleep. Only one
+   callback can be set at a time.
+    @param  cb
+            Pointer to the user-defined callback function.
+*/
+/**************************************************************************/
+void WatchdogRP2350::SetWakeCb(WakeCb cb) { _cb_wake = cb; }
+
+/**************************************************************************/
+/*!
+    @brief  Gets the duration of the previous sleep cycle, in milliseconds.
+    @return The sleep duration in milliseconds.
+*/
+/**************************************************************************/
+long WatchdogRP2350::GetSleepDuration() {
+  // Obtain the current time from the AON timer
+  struct timespec ts_sleep_end;
+  aon_timer_get_time(&ts_sleep_end);
+  // Compare timespecs to get sleep duration
+  long sleep_duration_ms =
+      (ts_sleep_end.tv_sec - _ts_sleep_start.tv_sec) * 1000 +
+      (ts_sleep_end.tv_nsec - _ts_sleep_start.tv_nsec) / 1000000;
+  return sleep_duration_ms;
 }
 
-void WatchdogRP2350::SetWakeCb(WakeCb cb) {
-    // store the callback for later use, i.e: sleep_goto_sleep_until(&ts, &sleep_callback);
-    _cb_wake = cb;
-}
-
-int WatchdogRP2350::SleepAonTimer(int max_period_ms) {
+/**************************************************************************/
+/*!
+    @brief  Puts the RP2350 into Sleep State (6.5.2) for a specified
+            period of time, uses the AON timer to wake the device.
+    @param  max_period_ms
+            Desired sleep period, in milliseconds.
+*/
+/**************************************************************************/
+void WatchdogRP2350::GoToSleepUntil(int max_period_ms) {
   if (max_period_ms < 0)
-    return 0;
+    return;
 
   // Configure the AON timer
   static bool aon_timer_started = false;
   if (!aon_timer_started) {
-    struct timespec ts_init = { .tv_sec = 1723124088, .tv_nsec = 0 };
+    struct timespec ts_init = {.tv_sec = 1723124088, .tv_nsec = 0};
     aon_timer_start(&ts_init);
     aon_timer_started = true;
   }
 
-  // Set the crystal oscillator as the dormant clock source, UART will be reconfigured from here
-  // This is only really necessary before sending the pico into dormancy but running from xosc while asleep saves power
+  // Set the crystal oscillator as the dormant clock source, UART will be
+  // reconfigured from here This is only really necessary before sending the
+  // pico into dormancy but running from xosc while asleep saves power
   sleep_run_from_xosc();
 
   // Get the time from the aon timer and set our alarm time
@@ -92,12 +125,13 @@ int WatchdogRP2350::SleepAonTimer(int max_period_ms) {
   aon_timer_get_time(&ts);
   ts.tv_sec += max_period_ms / 1000;
 
+  // Store the sleep start time
+  // TODO: Optimize by storing only once before sleep cycles if multiple sleeps
+  // are done
+  aon_timer_get_time(&_ts_sleep_start);
+
   // Go to sleep
   sleep_goto_sleep_until(&ts, _cb_wake);
-
-  return max_period_ms;
 }
-
-  
 
 #endif // ARDUINO_ARCH_RP2350

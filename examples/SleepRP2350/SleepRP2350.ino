@@ -38,7 +38,7 @@ void loop() {
   // Enter Sleep mode for 5 seconds
   awake = false;
   digitalWrite(LED_BUILTIN, LOW);
-  int sleep_ms = Watchdog.SleepAonTimer(5000);
+  int sleep_ms = Watchdog.GoToSleepUntil(5000);
 
     // Make sure we don't wake
     while (!awake) {
@@ -54,5 +54,9 @@ void loop() {
   USBDevice.attach();
   #endif
 
-  Serial.print("I'm awake now!");
+  Serial.println("I'm awake now!");
+  Serial.print("Slept for approximately ");
+  long sleep_duration = Watchdog.GetSleepDuration();
+  Serial.print(sleep_duration);
+  Serial.println(" milliseconds.");
 }
