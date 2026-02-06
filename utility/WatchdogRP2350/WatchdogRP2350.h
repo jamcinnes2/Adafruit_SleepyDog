@@ -41,8 +41,10 @@ public:
   int sleep(
       int maxPeriodMS = 0); // Basic sleep function, handled by software timer
   // Advanced "Sleep" State API
-  // Sleep State (6.5.2 in RP2350 Datasheet)
-  void GoToSleepUntil(int max_period_ms = 0);
+  // Sleep State (6.5.2, 6.5.3 in RP2350 Datasheet)
+  void GoToSleepUntil(int max_period_ms = 0, bool is_dormant = false);
+  void GoToSleepUntilPin(uint gpio_pin, bool edge = false, bool high = false);
+  // Advanced sleep state helper functions
   void SetWakeCb(WakeCb cb);
   void ResumeFromSleep();
   long GetSleepDuration();

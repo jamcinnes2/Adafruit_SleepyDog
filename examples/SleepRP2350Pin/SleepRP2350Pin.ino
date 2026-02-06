@@ -1,20 +1,20 @@
 // Adafruit Watchdog Library RP2350 Sleep Example
-// 
+//
 // Brent Rubell for Adafruit Industries
 // MIT License
 //
-#include <Arduino.h>
 #include <Adafruit_SleepyDog.h>
+#include <Arduino.h>
 
 static bool awake;
 
 // This function will be called when the device wakes from sleep
 // You can add any custom behavior you want here
 void cbWake() {
-    // Re-enable clock sources and generators
-    // Note: This MUST be called to properly resume from sleep
-    digitalWrite(LED_BUILTIN, HIGH); // Show we're awake again
-    awake = true;
+  // Re-enable clock sources and generators
+  // Note: This MUST be called to properly resume from sleep
+  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake again
+  awake = true;
 }
 
 void setup() {
@@ -22,7 +22,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   Serial.begin(115200);
-  while(!Serial);
+  // while(!Serial);
   Serial.println("Adafruit Watchdog Library - RP2350 Sleep Demo!");
   Serial.println();
 
@@ -38,21 +38,21 @@ void loop() {
   // Enter Sleep mode for 5 seconds
   awake = false;
   digitalWrite(LED_BUILTIN, LOW);
-  int sleep_ms = Watchdog.GoToSleepUntil(5000);
+  Watchdog.GoToSleepUntil(5000);
 
-    // Make sure we don't wake
-    while (!awake) {
-        Serial.println("Should be sleeping here...");
-    }
+  // Make sure we don't wake
+  while (!awake) {
+    Serial.println("Should be sleeping here...");
+  }
 
-  Watchdog.ResumeFromSleep(); 
+  Watchdog.ResumeFromSleep();
 
-  // Try to reattach USB connection on "native USB" boards (connection is
-  // lost on sleep). Host will also need to reattach to the Serial monitor.
-  // Seems not entirely reliable, hence the LED indicator fallback.
-  #if defined(USBCON) && !defined(USE_TINYUSB)
+// Try to reattach USB connection on "native USB" boards (connection is
+// lost on sleep). Host will also need to reattach to the Serial monitor.
+// Seems not entirely reliable, hence the LED indicator fallback.
+#if defined(USBCON) && !defined(USE_TINYUSB)
   USBDevice.attach();
-  #endif
+#endif
 
   Serial.println("I'm awake now!");
   Serial.print("Slept for approximately ");

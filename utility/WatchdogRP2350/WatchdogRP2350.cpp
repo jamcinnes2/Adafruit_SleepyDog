@@ -66,7 +66,17 @@ int WatchdogRP2350::sleep(int maxPeriodMS) {
    must be called by user code.
 */
 /**************************************************************************/
-void WatchdogRP2350::ResumeFromSleep() { sleep_power_up(); }
+void WatchdogRP2350::ResumeFromSleep() {
+  // Re-enable clock sources and generators
+  sleep_power_up();
+
+// Try to reattach USB connection on "native USB" boards (connection is
+// lost on sleep). Host will also need to reattach to the Serial monitor.
+// Seems not entirely reliable, hence the LED indicator fallback.
+#if defined(USBCON) && !defined(USE_TINYUSB)
+  USBDevice.attach();
+#endif
+}
 
 /**************************************************************************/
 /*!
@@ -97,13 +107,15 @@ long WatchdogRP2350::GetSleepDuration() {
 
 /**************************************************************************/
 /*!
-    @brief  Puts the RP2350 into Sleep State (6.5.2) for a specified
-            period of time, uses the AON timer to wake the device.
+    @brief  Puts the RP2350 into Sleep State (6.5.2, 6.5.3 in RP2350 Datasheet)
+   for a specified period of time, uses the AON timer to wake the device.
     @param  max_period_ms
             Desired sleep period, in milliseconds.
+    @param  is_dormant
+            If true, enters Dormant State (6.5.3) instead of Sleep State.
 */
 /**************************************************************************/
-void WatchdogRP2350::GoToSleepUntil(int max_period_ms) {
+void WatchdogRP2350::GoToSleepUntil(int max_period_ms, bool is_dormant) {
   if (max_period_ms < 0)
     return;
 
@@ -114,24 +126,54 @@ void WatchdogRP2350::GoToSleepUntil(int max_period_ms) {
     aon_timer_start(&ts_init);
     aon_timer_started = true;
   }
-
-  // Set the crystal oscillator as the dormant clock source, UART will be
-  // reconfigured from here This is only really necessary before sending the
-  // pico into dormancy but running from xosc while asleep saves power
-  sleep_run_from_xosc();
-
-  // Get the time from the aon timer and set our alarm time
-  struct timespec ts;
-  aon_timer_get_time(&ts);
-  ts.tv_sec += max_period_ms / 1000;
-
   // Store the sleep start time
   // TODO: Optimize by storing only once before sleep cycles if multiple sleeps
   // are done
   aon_timer_get_time(&_ts_sleep_start);
 
-  // Go to sleep
-  sleep_goto_sleep_until(&ts, _cb_wake);
+  // Configure the sleep source oscillator
+  if (!is_dormant) {
+    sleep_run_from_xosc();
+  } else {
+    sleep_run_from_lposc();
+  }
+
+  // Configure aon_timer alarm time
+  struct timespec ts;
+  aon_timer_get_time(&ts);
+  ts.tv_sec += max_period_ms / 1000;
+
+  // Enter sleep/dormant mode until the AON timer alarm fires
+  if (!is_dormant) {
+    sleep_goto_sleep_until(&ts, _cb_wake);
+  } else {
+    sleep_goto_dormant_until(&ts, _cb_wake);
+  }
+}
+
+/**************************************************************************/
+/*!
+    @brief  Puts the RP2350 into Dormant State (6.5.3 in RP2350 Datasheet) until
+   the specified GPIO pin changes state.
+    @param  gpio_pin
+            GPIO pin to monitor for wakeup.
+    @param  edge
+            True for rising edge, False for falling edge
+    @param  high
+            True for active high, False for active low.
+*/
+/**************************************************************************/
+void WatchdogRP2350::GoToSleepUntilPin(uint gpio_pin, bool edge, bool high) {
+  // Store the sleep start time
+  aon_timer_get_time(&_ts_sleep_start);
+
+  // Set the crystal oscillator as the dormant clock source, UART will be
+  // reconfigured from here This is necessary before sending the pico into
+  // dormancy
+  sleep_run_from_xosc();
+
+  // Enter dormant state until the specified GPIO pin changes state
+  sleep_goto_dormant_until_pin(gpio_pin, edge, high);
 }
 
 #endif // ARDUINO_ARCH_RP2350
