@@ -1,19 +1,21 @@
-// Adafruit Watchdog Library RP2350 Sleep Example
+// Adafruit Watchdog Library - RP2350 Pin/GPIO Sleep Example
+//
+// Simple example for using the Adafruit Watchdog Library to put the RP2350 to
+// sleep until a GPIO pin changes state.
 //
 // Brent Rubell for Adafruit Industries
-// MIT License
 //
+
 #include <Adafruit_SleepyDog.h>
 #include <Arduino.h>
-
+#define WAKE_PIN 0 // GPIO pin to wake on, change as needed for your use case
 static bool awake;
 
 // This function will be called when the device wakes from sleep
 // You can add any custom behavior you want here
 void cbWake() {
-  // Re-enable clock sources and generators
-  // Note: This MUST be called to properly resume from sleep
-  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake again
+  // Show we're awake again
+  digitalWrite(LED_BUILTIN, HIGH);
   awake = true;
 }
 
@@ -23,7 +25,7 @@ void setup() {
 
   Serial.begin(115200);
   // while(!Serial);
-  Serial.println("Adafruit Watchdog Library - RP2350 Sleep Demo!");
+  Serial.println("Adafruit Watchdog Library - RP2350 Sleep Pin/GPIO Demo!");
   Serial.println();
 
   // When the device wakes back up, we'll call this callback function
@@ -38,21 +40,27 @@ void loop() {
   // Enter Sleep mode for 5 seconds
   awake = false;
   digitalWrite(LED_BUILTIN, LOW);
-  Watchdog.GoToSleepUntil(5000);
+
+  // Sleep until GPIO WAKE_PIN goes HIGH on a rising edge
+  Watchdog.GoToSleepUntilPin(WAKE_PIN, true, true);
+
+  // Sleep until GPIO WAKE_PIN goes HIGH on a falling edge
+  // Watchdog.GoToSleepUntilPin(WAKE_PIN, false, true);
+
+  // Sleep until GPIO WAKE_PIN goes LOW on a rising edge
+  // Watchdog.GoToSleepUntilPin(WAKE_PIN, true, false);
+
+  // Sleep until GPIO WAKE_PIN goes LOW on a falling edge
+  // Watchdog.GoToSleepUntilPin(WAKE_PIN, false, false);
 
   // Make sure we don't wake
   while (!awake) {
     Serial.println("Should be sleeping here...");
   }
 
+  // Re-enable clocks, generators, USB and resume execution
+  // NOTE: This MUST be called to properly resume from sleep!
   Watchdog.ResumeFromSleep();
-
-// Try to reattach USB connection on "native USB" boards (connection is
-// lost on sleep). Host will also need to reattach to the Serial monitor.
-// Seems not entirely reliable, hence the LED indicator fallback.
-#if defined(USBCON) && !defined(USE_TINYUSB)
-  USBDevice.attach();
-#endif
 
   Serial.println("I'm awake now!");
   Serial.print("Slept for approximately ");

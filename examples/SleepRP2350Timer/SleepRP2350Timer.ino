@@ -1,8 +1,13 @@
-// Adafruit Watchdog Library RP2350 Timer Sleep Example
+// Adafruit Watchdog Library - RP2350 Timer Sleep Example
+//
+// Simple example for using the Adafruit Watchdog Library to put the RP2350 to
+// sleep until the AON timer expires. NOTE: This example exposes both the Sleep
+// State (6.5.2 in RP2350 Datasheet) and the Dormant State (6.5.3 in RP2350
+// Datasheet) APIs.
 //
 // Brent Rubell for Adafruit Industries
-// MIT License
 //
+
 #include <Adafruit_SleepyDog.h>
 #include <Arduino.h>
 
@@ -11,9 +16,8 @@ static bool awake;
 // This function will be called when the device wakes from sleep
 // You can add any custom behavior you want here
 void cbWake() {
-  // Re-enable clock sources and generators
-  // Note: This MUST be called to properly resume from sleep
-  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake again
+  // Show we're awake again
+  digitalWrite(LED_BUILTIN, HIGH);
   awake = true;
 }
 
