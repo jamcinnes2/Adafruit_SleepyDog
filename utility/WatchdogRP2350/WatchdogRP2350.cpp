@@ -66,7 +66,7 @@ int WatchdogRP2350::sleep(int maxPeriodMS) {
    must be called by user code.
 */
 /**************************************************************************/
-void WatchdogRP2350::ResumeFromSleep() {
+void WatchdogRP2350::resumeFromSleep() {
   // Re-enable clock sources and generators
   sleep_power_up();
 
@@ -86,7 +86,7 @@ void WatchdogRP2350::ResumeFromSleep() {
             Pointer to the user-defined callback function.
 */
 /**************************************************************************/
-void WatchdogRP2350::SetWakeCb(WakeCb cb) { _cb_wake = cb; }
+void WatchdogRP2350::setWakeCb(WakeCb cb) { _cb_wake = cb; }
 
 /**************************************************************************/
 /*!
@@ -94,7 +94,7 @@ void WatchdogRP2350::SetWakeCb(WakeCb cb) { _cb_wake = cb; }
     @return The sleep duration in milliseconds.
 */
 /**************************************************************************/
-long WatchdogRP2350::GetSleepDuration() {
+long WatchdogRP2350::getSleepDuration() {
   // Obtain the current time from the AON timer
   struct timespec ts_sleep_end;
   aon_timer_get_time(&ts_sleep_end);
@@ -115,12 +115,12 @@ long WatchdogRP2350::GetSleepDuration() {
             If true, enters Dormant State (6.5.3) instead of Sleep State.
 */
 /**************************************************************************/
-void WatchdogRP2350::GoToSleepUntil(int max_period_ms, bool is_dormant) {
+void WatchdogRP2350::goToSleepUntil(int max_period_ms, bool is_dormant) {
   if (max_period_ms < 0)
     return;
 
   // Configure the AON timer
-  StartAonTimer();
+  startAonTimer();
 
   // Get and store the sleep start time
   aon_timer_get_time(&_ts_sleep_start);
@@ -157,13 +157,13 @@ void WatchdogRP2350::GoToSleepUntil(int max_period_ms, bool is_dormant) {
             True for active high, False for active low.
 */
 /**************************************************************************/
-void WatchdogRP2350::GoToSleepUntilPin(uint gpio_pin, bool edge, bool high) {
+void WatchdogRP2350::goToSleepUntilPin(uint gpio_pin, bool edge, bool high) {
   // Set the crystal oscillator as the dormant clock source, UART will be
   // reconfigured from here This is necessary before sending the pico into
   // dormancy
   // NOTE: Because we are using the crystal oscillator as the clock source, the
   // AON timer will not run, so we can not use the AON timer to measure sleep
-  // duration like we do in GoToSleepUntil().
+  // duration like we do in goToSleepUntil().
   sleep_run_from_xosc();
 
   // Enter dormant state until the specified GPIO pin changes state
@@ -175,7 +175,7 @@ void WatchdogRP2350::GoToSleepUntilPin(uint gpio_pin, bool edge, bool high) {
     @brief  Helper function to initialize and check AON timer.
     @return True if the AON timer has been started, False otherwise.
 */
-bool WatchdogRP2350::StartAonTimer() {
+bool WatchdogRP2350::startAonTimer() {
   if (!_aon_timer_started) {
     struct timespec ts_init = {.tv_sec = 1723124088, .tv_nsec = 0};
     aon_timer_start(&ts_init);

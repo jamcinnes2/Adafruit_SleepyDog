@@ -31,7 +31,7 @@ void setup() {
 
   // When the device wakes back up, we'll call this callback function
   // to indicate that we've resumed from sleep.
-  Watchdog.SetWakeCb(cbWake);
+  Watchdog.setWakeCb(cbWake);
 }
 
 void loop() {
@@ -42,10 +42,10 @@ void loop() {
   awake = false;
   digitalWrite(LED_BUILTIN, LOW);
   // Enter sleep state (6.5.2 in RP2350 Datasheet)
-  Watchdog.GoToSleepUntil(5000);
+  Watchdog.goToSleepUntil(5000);
   // Uncomment the line below (and comment the line above) to enter Dormant
   // State (6.5.3 in RP2350 Datasheet) instead of the Sleep State above
-  // Watchdog.GoToSleepUntil(5000, true);
+  // Watchdog.goToSleepUntil(5000, true);
 
   // Make sure we don't wake
   while (!awake) {
@@ -54,11 +54,11 @@ void loop() {
 
   // Re-enable clocks, generators, USB and resume execution
   // NOTE: This MUST be called to properly resume from sleep!
-  Watchdog.ResumeFromSleep();
+  Watchdog.resumeFromSleep();
 
   Serial.println("I'm awake now!");
   Serial.print("Slept for approximately ");
-  long sleep_duration = Watchdog.GetSleepDuration();
+  long sleep_duration = Watchdog.getSleepDuration();
   Serial.print(sleep_duration);
   Serial.println(" milliseconds.");
 }

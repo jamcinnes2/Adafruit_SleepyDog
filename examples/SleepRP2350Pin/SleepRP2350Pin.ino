@@ -28,20 +28,20 @@ void loop() {
   digitalWrite(LED_BUILTIN, LOW);
 
   // Sleep until GPIO WAKE_PIN goes HIGH on a rising edge
-  Watchdog.GoToSleepUntilPin(WAKE_PIN, true, true);
+  Watchdog.goToSleepUntilPin(WAKE_PIN, true, true);
 
   // Sleep until GPIO WAKE_PIN goes HIGH on a falling edge
-  // Watchdog.GoToSleepUntilPin(WAKE_PIN, false, true);
+  // Watchdog.goToSleepUntilPin(WAKE_PIN, false, true);
 
   // Sleep until GPIO WAKE_PIN goes LOW on a rising edge
-  // Watchdog.GoToSleepUntilPin(WAKE_PIN, true, false);
+  // Watchdog.goToSleepUntilPin(WAKE_PIN, true, false);
 
   // Sleep until GPIO WAKE_PIN goes LOW on a falling edge
-  // Watchdog.GoToSleepUntilPin(WAKE_PIN, false, false);
+  // Watchdog.goToSleepUntilPin(WAKE_PIN, false, false);
 
   // Re-enable clocks, generators, USB and resume execution
   // NOTE: This MUST be called to properly resume from sleep!
-  Watchdog.ResumeFromSleep();
+  Watchdog.resumeFromSleep();
 
   // NOTE: We can not track sleep duration when waking from a pin because we use
   // the crystal oscillator as the dormant clock source, so the AON timer we'd
