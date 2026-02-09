@@ -9,7 +9,6 @@
 //
 
 #include <Adafruit_SleepyDog.h>
-#include <Arduino.h>
 
 static bool awake;
 

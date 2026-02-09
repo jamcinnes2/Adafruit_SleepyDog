@@ -7,7 +7,6 @@
 //
 
 #include <Adafruit_SleepyDog.h>
-#include <Arduino.h>
 #define WAKE_PIN 2 // GPIO pin to wake on, change as needed for your use case
 
 void setup() {
