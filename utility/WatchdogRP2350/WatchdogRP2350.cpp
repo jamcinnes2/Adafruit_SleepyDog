@@ -120,25 +120,19 @@ void WatchdogRP2350::GoToSleepUntil(int max_period_ms, bool is_dormant) {
     return;
 
   // Configure the AON timer
-  static bool aon_timer_started = false;
-  if (!aon_timer_started) {
-    struct timespec ts_init = {.tv_sec = 1723124088, .tv_nsec = 0};
-    aon_timer_start(&ts_init);
-    aon_timer_started = true;
-  }
-  // Store the sleep start time
-  // TODO: Optimize by storing only once before sleep cycles if multiple sleeps
-  // are done
+  StartAonTimer();
+
+  // Get and store the sleep start time
   aon_timer_get_time(&_ts_sleep_start);
 
-  // Configure the sleep source oscillator
+  // Configure the sleep clock source
   if (!is_dormant) {
     sleep_run_from_xosc();
   } else {
     sleep_run_from_lposc();
   }
 
-  // Configure aon_timer alarm time
+  // Configure aon_timer alarm
   struct timespec ts;
   aon_timer_get_time(&ts);
   ts.tv_sec += max_period_ms / 1000;
@@ -164,16 +158,30 @@ void WatchdogRP2350::GoToSleepUntil(int max_period_ms, bool is_dormant) {
 */
 /**************************************************************************/
 void WatchdogRP2350::GoToSleepUntilPin(uint gpio_pin, bool edge, bool high) {
-  // Store the sleep start time
-  aon_timer_get_time(&_ts_sleep_start);
-
   // Set the crystal oscillator as the dormant clock source, UART will be
   // reconfigured from here This is necessary before sending the pico into
   // dormancy
+  // NOTE: Because we are using the crystal oscillator as the clock source, the
+  // AON timer will not run, so we can not use the AON timer to measure sleep
+  // duration like we do in GoToSleepUntil().
   sleep_run_from_xosc();
 
   // Enter dormant state until the specified GPIO pin changes state
   sleep_goto_dormant_until_pin(gpio_pin, edge, high);
+}
+
+/**************************************************************************/
+/*!
+    @brief  Helper function to initialize and check AON timer.
+    @return True if the AON timer has been started, False otherwise.
+*/
+bool WatchdogRP2350::StartAonTimer() {
+  if (!_aon_timer_started) {
+    struct timespec ts_init = {.tv_sec = 1723124088, .tv_nsec = 0};
+    aon_timer_start(&ts_init);
+    _aon_timer_started = true;
+  }
+  return _aon_timer_started;
 }
 
 #endif // ARDUINO_ARCH_RP2350

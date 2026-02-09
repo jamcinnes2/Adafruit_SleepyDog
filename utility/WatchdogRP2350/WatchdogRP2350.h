@@ -31,7 +31,7 @@ typedef void (*WakeCb)(void);
 /**************************************************************************/
 class WatchdogRP2350 {
 public:
-  WatchdogRP2350() : _wdto(-1) {};
+  WatchdogRP2350() : _wdto(-1), _aon_timer_started(false) {};
   // Watchdog API
   int enable(int maxPeriodMS = 0);
   void disable()
@@ -53,6 +53,8 @@ private:
   int _wdto;
   WakeCb _cb_wake = nullptr;
   struct timespec _ts_sleep_start;
+  bool _aon_timer_started;
+  bool StartAonTimer();
 };
 
 #endif // WATCHDOGRP2350_H_
