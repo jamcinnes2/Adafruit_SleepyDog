@@ -7,9 +7,9 @@
 #ifndef _PICO_SLEEP_H_
 #define _PICO_SLEEP_H_
 
-#include "pico.h"
 #include "../../../hardware_rosc/include/hardware/rosc.h"
 #include "hardware/timer.h"
+#include "pico.h"
 #include "pico/aon_timer.h"
 
 #ifdef __cplusplus
@@ -21,11 +21,15 @@ extern "C" {
  *
  * Lower Power Sleep API
  *
- * The difference between sleep and dormant is that ALL clocks are stopped in dormant mode,
+ * The difference between sleep and dormant is that ALL clocks are stopped in
+ dormant mode,
  * until the source (either xosc or rosc) is started again by an external event.
- * In sleep mode some clocks can be left running controlled by the SLEEP_EN registers in the clocks
- * block. For example you could keep clk_rtc running. Some destinations (proc0 and proc1 wakeup logic)
- * can't be stopped in sleep mode otherwise there wouldn't be enough logic to wake up again.
+ * In sleep mode some clocks can be left running controlled by the SLEEP_EN
+ registers in the clocks
+ * block. For example you could keep clk_rtc running. Some destinations (proc0
+ and proc1 wakeup logic)
+ * can't be stopped in sleep mode otherwise there wouldn't be enough logic to
+ wake up again.
  *
  * \subsection sleep_example Example
  * \addtogroup hardware_sleep
@@ -33,14 +37,14 @@ extern "C" {
 
  */
 typedef enum {
-    DORMANT_SOURCE_NONE,
-    DORMANT_SOURCE_XOSC,
-    DORMANT_SOURCE_ROSC,
-    DORMANT_SOURCE_LPOSC, // rp2350 only
+  DORMANT_SOURCE_NONE,
+  DORMANT_SOURCE_XOSC,
+  DORMANT_SOURCE_ROSC,
+  DORMANT_SOURCE_LPOSC, // rp2350 only
 } dormant_source_t;
 
-/*! \brief Set all clock sources to the the dormant clock source to prepare for sleep.
- *  \ingroup hardware_sleep
+/*! \brief Set all clock sources to the the dormant clock source to prepare for
+ * sleep. \ingroup hardware_sleep
  *
  * \param dormant_source The dormant clock source to use
  */
@@ -50,12 +54,12 @@ void sleep_run_from_dormant_source(dormant_source_t dormant_source);
  *  \ingroup hardware_sleep
  */
 static inline void sleep_run_from_xosc(void) {
-    sleep_run_from_dormant_source(DORMANT_SOURCE_XOSC);
+  sleep_run_from_dormant_source(DORMANT_SOURCE_XOSC);
 }
 
 #if !PICO_RP2040
 static inline void sleep_run_from_lposc(void) {
-    sleep_run_from_dormant_source(DORMANT_SOURCE_LPOSC);
+  sleep_run_from_dormant_source(DORMANT_SOURCE_LPOSC);
 }
 #endif
 
@@ -63,7 +67,7 @@ static inline void sleep_run_from_lposc(void) {
  *  \ingroup hardware_sleep
  */
 static inline void sleep_run_from_rosc(void) {
-    sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC);
+  sleep_run_from_dormant_source(DORMANT_SOURCE_ROSC);
 }
 
 /*! \brief Send system to sleep until the specified time
@@ -74,10 +78,12 @@ static inline void sleep_run_from_rosc(void) {
  * \param ts The time to wake up
  * \param callback Function to call on wakeup.
  */
-void sleep_goto_sleep_until(struct timespec *ts, aon_timer_alarm_handler_t callback);
+void sleep_goto_sleep_until(struct timespec *ts,
+                            aon_timer_alarm_handler_t callback);
 
-/*! \brief Send system to sleep for a specified duration in milliseconds. This provides an alternative to sleep_goto_sleep_until
-to allow for shorter duration sleeps.
+/*! \brief Send system to sleep for a specified duration in milliseconds. This
+provides an alternative to sleep_goto_sleep_until to allow for shorter duration
+sleeps.
  *  \ingroup hardware_sleep
  *
  * One of the sleep_run_* functions must be called prior to this call
@@ -86,17 +92,19 @@ to allow for shorter duration sleeps.
  * \param callback Function to call on wakeup.
  * \return Returns true if the device went to sleep
  */
-bool sleep_goto_sleep_for(uint32_t delay_ms, hardware_alarm_callback_t callback);
+bool sleep_goto_sleep_for(uint32_t delay_ms,
+                          hardware_alarm_callback_t callback);
 
-/*! \brief Send system to dormant until the specified time, note for RP2040 the RTC must be driven by an external clock
- *  \ingroup hardware_sleep
+/*! \brief Send system to dormant until the specified time, note for RP2040 the
+ * RTC must be driven by an external clock \ingroup hardware_sleep
  *
  * One of the sleep_run_* functions must be called prior to this call
  *
  * \param ts The time to wake up
  * \param callback Function to call on wakeup.
  */
-void sleep_goto_dormant_until(struct timespec *ts, aon_timer_alarm_handler_t callback);
+void sleep_goto_dormant_until(struct timespec *ts,
+                              aon_timer_alarm_handler_t callback);
 
 /*! \brief Send system to sleep until the specified GPIO changes
  *  \ingroup hardware_sleep
@@ -118,7 +126,7 @@ void sleep_goto_dormant_until_pin(uint gpio_pin, bool edge, bool high);
  * \param gpio_pin The pin to provide the wake up
  */
 static inline void sleep_goto_dormant_until_edge_high(uint gpio_pin) {
-    sleep_goto_dormant_until_pin(gpio_pin, true, true);
+  sleep_goto_dormant_until_pin(gpio_pin, true, true);
 }
 
 /*! \brief Send system to sleep until a high level is detected on GPIO
@@ -129,13 +137,14 @@ static inline void sleep_goto_dormant_until_edge_high(uint gpio_pin) {
  * \param gpio_pin The pin to provide the wake up
  */
 static inline void sleep_goto_dormant_until_level_high(uint gpio_pin) {
-    sleep_goto_dormant_until_pin(gpio_pin, false, true);
+  sleep_goto_dormant_until_pin(gpio_pin, false, true);
 }
 
 /*! \brief Reconfigure clocks to wake up properly from sleep/dormant mode
  *  \ingroup hardware_sleep
  *
- * This must be called immediately after continuing execution when waking up from sleep/dormant mode
+ * This must be called immediately after continuing execution when waking up
+ * from sleep/dormant mode
  *
  */
 void sleep_power_up(void);
