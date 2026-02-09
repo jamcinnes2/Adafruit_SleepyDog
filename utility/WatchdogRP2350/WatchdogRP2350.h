@@ -1,7 +1,7 @@
 /*!
  * @file WatchdogRP2350.h
  *
- * Support for RP2040 Hardware Watchdog Timer API
+ * Support for RP2350 Hardware Watchdog Timer API
  *
  * Adafruit invests time and resources providing this open source code,
  * please support Adafruit and open-source hardware by purchasing

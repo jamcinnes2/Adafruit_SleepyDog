@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#if defined(ARDUINO_ARCH_RP2350)
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -305,3 +306,5 @@ void sleep_power_up(void) {
   // UART needs to be reinitialised with the new clock frequencies for stable
   // output setup_default_uart();
 }
+
+#endif // ARDUINO_ARCH_RP2350

@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#if defined(ARDUINO_ARCH_RP2350)
 
 #ifndef _PICO_SLEEP_H_
 #define _PICO_SLEEP_H_
@@ -153,4 +154,5 @@ void sleep_power_up(void);
 }
 #endif
 
-#endif
+#endif // _PICO_SLEEP_H_
+#endif // ARDUINO_ARCH_RP2350

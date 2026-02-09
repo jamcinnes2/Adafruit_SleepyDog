@@ -2,7 +2,7 @@
 
 Arduino library to use the watchdog timer for system reset. Also provides  simple API access for entering/exiting from low power sleep modes.
 
-# Supported Platforms
+## Supported Platforms
 | Support Level | Platform / Board Family | MCU(s) | Notes / Caveats |
 |--------------|------------------------|--------|-----------------|
 | **Full** | Raspberry Pi Pico | RP2040, RP2350 | — |

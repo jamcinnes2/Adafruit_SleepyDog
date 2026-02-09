@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
+#if defined(ARDUINO_ARCH_RP2350)
 #include "pico.h"
 
 // For MHZ definitions etc
@@ -77,3 +77,5 @@ void rosc_enable(void) {
   while (!(rosc_hw->status & ROSC_STATUS_STABLE_BITS))
     ;
 }
+
+#endif // ARDUINO_ARCH_RP2350

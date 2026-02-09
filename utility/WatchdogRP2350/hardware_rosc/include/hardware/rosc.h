@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#if defined(ARDUINO_ARCH_RP2350)
 
 #ifndef _HARDWARE_ROSC_H_
 #define _HARDWARE_ROSC_H_
@@ -95,4 +96,5 @@ void rosc_enable(void);
 }
 #endif
 
-#endif
+#endif // _HARDWARE_ROSC_H_
+#endif // ARDUINO_ARCH_RP2350

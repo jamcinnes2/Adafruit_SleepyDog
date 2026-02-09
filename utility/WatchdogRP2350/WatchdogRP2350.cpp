@@ -1,4 +1,4 @@
-#if defined(ARDUINO_ARCH_RP2040)
+#if defined(ARDUINO_ARCH_RP2350)
 
 #include "WatchdogRP2350.h"
 
